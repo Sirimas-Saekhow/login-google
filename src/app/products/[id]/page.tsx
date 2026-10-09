@@ -1,8 +1,6 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { getProduct } from "@/lib/products";
-import { updateProductAction } from "@/app/actions";
+import { getProduct, updateProduct } from "@/lib/products";
 
 type EditProductPageProps = {
   params: Promise<{ id: string }>;
@@ -21,7 +19,14 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     notFound();
   }
 
-  const updateAction = updateProductAction.bind(null, product.id);
+  async function handleSubmit(formData: FormData) {
+    "use server";
+    const title = formData.get("title") as string;
+    const price = Number(formData.get("price"));
+
+    updateProduct(id, { title, price });
+    redirect("/");
+  }
 
   return (
     <main className="min-h-screen bg-slate-50/50 py-12 px-4">
@@ -30,60 +35,39 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
           ✏️ แก้ไขสินค้า
         </h1>
 
-        <form action={updateAction} className="space-y-4">
+        <form action={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-xs font-semibold text-slate-600 mb-1">
+            <label htmlFor="title" className="block text-xs font-semibold text-slate-600 mb-1">
               ชื่อสินค้า
             </label>
             <input
-              id="name"
-              name="name"
-              defaultValue={product.name}
+              type="text"
+              id="title"
+              name="title"
+              defaultValue={product.title ?? product.name}
               required
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
+              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div>
             <label htmlFor="price" className="block text-xs font-semibold text-slate-600 mb-1">
-              ราคา (บาท)
+              ราคา
             </label>
             <input
+              type="number"
               id="price"
               name="price"
-              type="number"
-              min="0"
-              step="0.01"
               defaultValue={product.price}
               required
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
+              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          <div>
-            <label htmlFor="description" className="block text-xs font-semibold text-slate-600 mb-1">
-              รายละเอียด
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              defaultValue={product.description}
-              required
-              rows={3}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
-            />
-          </div>
-
-          <div className="flex gap-2 justify-end pt-3">
-            <Link
-              href="/"
-              className="px-4 py-2 border border-slate-200 text-slate-600 font-medium text-xs rounded-lg hover:bg-slate-50 transition"
-            >
-              ยกเลิก
-            </Link>
+          <div className="pt-2 flex gap-2">
             <button
               type="submit"
-              className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs rounded-lg shadow-sm transition"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg transition-colors"
             >
               บันทึกการแก้ไข
             </button>
