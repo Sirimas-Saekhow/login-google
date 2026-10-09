@@ -53,7 +53,7 @@ export default function ProductExplorer() {
     }
   }
 
-  function removeProduct(id: number) {
+    function removeProduct(id: number | string) {
     setProducts(products.filter((item) => item.id !== id));
     if (editingItem?.id === id) {
       setEditingItem(null);

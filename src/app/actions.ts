@@ -1,9 +1,9 @@
 "use server";
 
-import { auth } from "@/auth";
-import { deleteProduct, updateProduct } from "@/lib/products";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { updateProduct, deleteProduct } from "@/lib/products";
 
 async function requireUser() {
   const session = await auth();
@@ -16,11 +16,11 @@ async function requireUser() {
 export async function updateProductAction(id: string, formData: FormData) {
   await requireUser();
 
-  const name = String(formData.get("name") ?? "").trim();
+  const title = String(formData.get("name") ?? formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const price = Number(formData.get("price"));
 
-  if (!name || !description) {
+  if (!title || !description) {
     throw new Error("กรุณากรอกข้อมูลให้ครบ");
   }
 
@@ -28,7 +28,12 @@ export async function updateProductAction(id: string, formData: FormData) {
     throw new Error("ราคาไม่ถูกต้อง");
   }
 
-  updateProduct(id, { name, description, price });
+  updateProduct(id, {
+    title,
+    description,
+    price,
+  });
+
   revalidatePath("/");
   redirect("/");
 }
